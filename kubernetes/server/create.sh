@@ -1,11 +1,11 @@
 #!/bin/bash
 
 function kubectl_create() {
-  kubectl create -f scdf.yml --namespace $KUBERNETES_NAMESPACE
+  kubectl create -f scdf.yml --namespace $KUBERNETES_NAMESPACE --validate=false
   READY_FOR_TESTS=1
   for i in $( seq 1 "${RETRIES}" ); do
     SERVER_URI=$(kubectl get svc scdf --namespace $KUBERNETES_NAMESPACE | grep scdf | awk '{print $3}')
-    [ '<pending>' != $SERVER_URI ] && READY_FOR_TESTS=0 && break
+    [ "80/TCP" != "${SERVER_URI}" ] && READY_FOR_TESTS=0 && break
     echo "Waiting for server external ip. Attempt  #$i/${RETRIES}... will try again in [${WAIT_TIME}] seconds" >&2
     sleep "${WAIT_TIME}"
   done
